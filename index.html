@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RCV Simulator — Ranked Choice Voting Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-mark">⑴</span>
+        <span class="logo-text">RCV Simulator</span>
+      </div>
+      <nav class="header-nav">
+        <a href="#how-it-works">How It Works</a>
+        <a href="https://github.com/YOUR_USERNAME/rcv-simulator" target="_blank" class="nav-gh">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Interactive Election Simulator</p>
+      <h1 class="hero-title">Ranked Choice Voting,<br><em>round by round.</em></h1>
+      <p class="hero-subtitle">Build a race, cast ballots, and watch elimination rounds unfold with step-by-step explanations of exactly what's happening — and why.</p>
+      <div class="hero-modes">
+        <button class="mode-btn mode-primary" id="btn-configure" onclick="App.startMode('configure')">
+          <span class="mode-icon">⚙</span>
+          <span class="mode-label">Configure & Simulate</span>
+          <span class="mode-desc">Set candidate stats, polling, and turnout — then run the race</span>
+        </button>
+        <button class="mode-btn mode-secondary" id="btn-voter" onclick="App.startMode('voter')">
+          <span class="mode-icon">✉</span>
+          <span class="mode-label">Vote as a Citizen</span>
+          <span class="mode-desc">Rank candidates without seeing the polling — then watch results</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="explainer" id="how-it-works">
+    <div class="explainer-inner">
+      <h2 class="section-title">How Ranked Choice Voting works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Voters rank candidates</h3>
+            <p>Instead of choosing one person, voters order their preferences: 1st choice, 2nd choice, 3rd, and so on.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>First-choice votes are tallied</h3>
+            <p>The initial count looks just like a regular election. If any candidate has more than 50% of votes, they win immediately.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Last-place candidate is eliminated</h3>
+            <p>If no majority exists, the candidate in last place is removed from the race entirely.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>Votes are redistributed</h3>
+            <p>Everyone who ranked the eliminated candidate #1 has their vote transferred to whoever they ranked #2. This repeats until someone has a majority.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN SIMULATOR AREA -->
+  <main class="simulator" id="simulator">
+
+    <!-- ====== CONFIGURE MODE ====== -->
+    <section class="sim-panel" id="panel-configure" style="display:none">
+      <div class="panel-inner">
+        <div class="panel-header">
+          <h2>Configure the Race</h2>
+          <p>Adjust each candidate's profile, polling average, and turnout assumptions. These shape how ballots are generated.</p>
+        </div>
+
+        <div class="config-controls">
+          <div class="control-row">
+            <label>Number of candidates</label>
+            <div class="stepper">
+              <button onclick="Config.removeCandidate()">−</button>
+              <span id="candidate-count">4</span>
+              <button onclick="Config.addCandidate()">+</button>
+            </div>
+          </div>
+          <div class="control-row">
+            <label>Total simulated voters</label>
+            <input type="range" id="voter-count" min="500" max="50000" step="500" value="10000" oninput="Config.updateVoterCount(this.value)">
+            <span class="range-val" id="voter-count-display">10,000</span>
+          </div>
+          <div class="control-row">
+            <label>Turnout variability</label>
+            <div class="toggle-group">
+              <button class="toggle active" data-val="low" onclick="Config.setTurnoutVar(this)">Low</button>
+              <button class="toggle" data-val="medium" onclick="Config.setTurnoutVar(this)">Medium</button>
+              <button class="toggle" data-val="high" onclick="Config.setTurnoutVar(this)">High</button>
+            </div>
+            <span class="hint">How much actual turnout deviates from polling</span>
+          </div>
+        </div>
+
+        <div class="candidates-grid" id="candidates-grid">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="panel-actions">
+          <button class="btn-primary" onclick="Simulator.runSimulation()">Run Simulation →</button>
+          <button class="btn-ghost" onclick="Config.randomize()">Randomize candidates</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== VOTER MODE ====== -->
+    <section class="sim-panel" id="panel-voter" style="display:none">
+      <div class="panel-inner">
+        <div class="panel-header">
+          <h2>Cast Your Ballot</h2>
+          <p>Rank the candidates in order of preference. Drag to reorder, or use the arrow buttons. You won't see polling data until after you submit.</p>
+        </div>
+        <div class="ballot-container">
+          <div class="ballot-instructions">
+            <p>Drag candidates to rank them. <strong>Your #1 is at the top.</strong></p>
+          </div>
+          <ul class="ballot-list" id="ballot-list">
+            <!-- populated by JS -->
+          </ul>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-primary" onclick="Voter.submitBallot()">Submit Ballot & See Results →</button>
+          <button class="btn-ghost" onclick="App.startMode('configure')">Switch to Configure mode</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== RESULTS PANEL ====== -->
+    <section class="sim-panel" id="panel-results" style="display:none">
+      <div class="panel-inner">
+        <div class="panel-header">
+          <h2 id="results-title">Election Results</h2>
+          <p id="results-subtitle"></p>
+        </div>
+
+        <!-- Voter's ballot summary (voter mode only) -->
+        <div id="voter-ballot-summary" style="display:none" class="voter-summary">
+          <h3>Your ballot</h3>
+          <div id="voter-ballot-display"></div>
+          <hr class="section-divider">
+        </div>
+
+        <!-- Round-by-round results -->
+        <div id="rounds-container">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="panel-actions">
+          <button class="btn-primary" onclick="App.reset()">Start Over</button>
+          <button class="btn-ghost" onclick="Simulator.runSimulation()">Re-run with same config</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>Built to explain RCV. Open source on <a href="https://github.com/YOUR_USERNAME/rcv-simulator" target="_blank">GitHub</a>.</p>
+      <p class="footer-note">Simulated ballots use a probabilistic model — results vary each run. Not affiliated with any election authority.</p>
+    </div>
+  </footer>
+
+  <script src="js/candidates.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/ballot.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
