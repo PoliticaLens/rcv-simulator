@@ -5,10 +5,28 @@ const Config = (() => {
     candidates: JSON.parse(JSON.stringify(DEFAULT_CANDIDATES)),
     voterCount: 10000,
     turnoutVar: 'low',
+    electionType: 'general',
+    customParty: 'Independent Party',
     extraPool: JSON.parse(JSON.stringify(EXTRA_CANDIDATE_POOL)),
   };
 
-  function getCandidates() { return state.candidates; }
+  function getPartyLabel() {
+    return {
+      'general': null, // each candidate has their own party
+      'primary-dem': 'Democratic Party',
+      'primary-rep': 'Republican Party',
+      'primary-custom': state.customParty || 'Primary',
+    }[state.electionType];
+  }
+
+  function getElectionType() { return state.electionType; }
+
+  function getCandidates() {
+    const partyLabel = getPartyLabel();
+    if (partyLabel === null) return state.candidates;
+    // In primary mode, override each candidate's party with the shared label
+    return state.candidates.map(c => ({ ...c, party: partyLabel }));
+  }
   function getVoterCount() { return state.voterCount; }
   function getTurnoutVar() { return state.turnoutVar; }
 
@@ -24,6 +42,10 @@ const Config = (() => {
       card.className = 'candidate-card';
       card.dataset.id = c.id;
 
+      const partyLabel = getPartyLabel();
+      const partyVal = partyLabel !== null ? partyLabel : c.party;
+      const partyReadonly = partyLabel !== null;
+
       card.innerHTML = `
         <div class="card-top">
           <div class="candidate-avatar" style="background:${col.color}">
@@ -33,9 +55,10 @@ const Config = (() => {
             <input class="card-name-input" value="${escHtml(c.name)}"
               oninput="Config._updateField(${c.id}, 'name', this.value)"
               placeholder="Candidate name" />
-            <input class="card-party-input" value="${escHtml(c.party)}"
+            <input class="card-party-input" value="${escHtml(partyVal)}"
               oninput="Config._updateField(${c.id}, 'party', this.value)"
-              placeholder="Party / affiliation" />
+              placeholder="Party / affiliation"
+              ${partyReadonly ? 'readonly style="opacity:.5;cursor:default"' : ''} />
           </div>
           ${state.candidates.length > 2 ? `<button class="remove-btn" onclick="Config._removeById(${c.id})" title="Remove candidate">✕</button>` : ''}
         </div>
@@ -137,13 +160,34 @@ const Config = (() => {
     render();
   }
 
+  function setElectionType(btn) {
+    document.querySelectorAll('[onclick*="setElectionType"] .toggle, .toggle[onclick*="setElectionType"]').forEach(b => b.classList.remove('active'));
+    // target all election type toggles
+    document.querySelectorAll('.toggle[data-val]').forEach(b => {
+      if (['general','primary-dem','primary-rep','primary-custom'].includes(b.dataset.val)) {
+        b.classList.remove('active');
+      }
+    });
+    btn.classList.add('active');
+    state.electionType = btn.dataset.val;
+    const customRow = document.getElementById('custom-party-row');
+    if (customRow) customRow.style.display = state.electionType === 'primary-custom' ? 'flex' : 'none';
+    render();
+  }
+
+  function setCustomParty(val) {
+    state.customParty = val || 'Primary';
+    render();
+  }
+
   function init() {
     render();
   }
 
   return {
-    init, render, getCandidates, getVoterCount, getTurnoutVar,
+    init, render, getCandidates, getVoterCount, getTurnoutVar, getElectionType,
     addCandidate, removeCandidate, updateVoterCount, setTurnoutVar,
+    setElectionType, setCustomParty,
     randomize, _updateField, _updateStat, _removeById,
   };
 })();
