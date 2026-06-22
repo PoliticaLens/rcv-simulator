@@ -14,7 +14,7 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-mark">PoliticaLens</span>
+        <span class="logo-mark">⑴</span>
         <span class="logo-text">RCV Simulator</span>
       </div>
       <nav class="header-nav">
@@ -94,6 +94,20 @@
         </div>
 
         <div class="config-controls">
+          <div class="control-row">
+            <label>Election type</label>
+            <div class="toggle-group">
+              <button class="toggle active" data-val="general" onclick="Config.setElectionType(this)">General Election</button>
+              <button class="toggle" data-val="primary-dem" onclick="Config.setElectionType(this)">Democratic Primary</button>
+              <button class="toggle" data-val="primary-rep" onclick="Config.setElectionType(this)">Republican Primary</button>
+              <button class="toggle" data-val="primary-custom" onclick="Config.setElectionType(this)">Custom Primary</button>
+            </div>
+          </div>
+          <div class="control-row" id="custom-party-row" style="display:none">
+            <label>Party name</label>
+            <input type="text" id="custom-party-input" placeholder="e.g. Green Party" oninput="Config.setCustomParty(this.value)"
+              style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);font-family:var(--font-sans);font-size:.875rem;width:220px;">
+          </div>
           <div class="control-row">
             <label>Number of candidates</label>
             <div class="stepper">
