@@ -11,10 +11,18 @@ const Renderer = (() => {
 
     const title = document.getElementById('results-title');
     const subtitle = document.getElementById('results-subtitle');
+    const electionType = Config.getElectionType();
+    const electionLabel = {
+      'general': 'General Election',
+      'primary-dem': 'Democratic Primary',
+      'primary-rep': 'Republican Primary',
+      'primary-custom': Config.getCandidates()[0]?.party || 'Primary',
+    }[electionType] || 'Election';
+
     title.textContent = rounds.length === 1 && rounds[0].winner !== null
       ? 'Winner on first count!'
       : `Results — ${rounds.length} round${rounds.length > 1 ? 's' : ''}`;
-    subtitle.textContent = `${rounds[rounds.length - 1].totalVotes.toLocaleString()} votes cast across ${candidates.length} candidates.`;
+    subtitle.textContent = `${electionLabel} · ${rounds[rounds.length - 1].totalVotes.toLocaleString()} votes cast across ${candidates.length} candidates.`;
 
     // Voter ballot summary
     const voterSummaryEl = document.getElementById('voter-ballot-summary');
