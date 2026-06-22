@@ -2,7 +2,7 @@
 
 An interactive, browser-based simulator for **Ranked Choice Voting** (also called Instant-Runoff Voting). Watch elimination rounds unfold step-by-step, with plain-English explanations of exactly what's happening at each stage.
 
-**[Live Demo →](https://YOUR_USERNAME.github.io/rcv-simulator)** 
+**[Live Demo →](https://politicalens.github.io/rcv-simulator/)** 
 
 ---
 
