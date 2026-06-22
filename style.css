@@ -68,7 +68,7 @@ body {
   display: flex; align-items: center; justify-content: space-between;
 }
 .logo { display: flex; align-items: center; gap: var(--space-s); text-decoration: none; }
-.logo-img { height: 32px; width: auto; display: block; }
+.logo-img { height: 28px; width: auto; display: block; object-fit: contain; }
 .logo-text { font-weight: 500; font-size: .95rem; letter-spacing: -.01em; color: var(--ink); }
 .logo-brand { font-weight: 700; }
 .header-nav { display: flex; gap: var(--space-l); align-items: center; }
