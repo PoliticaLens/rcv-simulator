@@ -144,7 +144,10 @@ const Config = (() => {
   }
 
   function setTurnoutVar(btn) {
-    document.querySelectorAll('.toggle-group .toggle').forEach(b => b.classList.remove('active'));
+    const turnoutVals = ['low', 'medium', 'high'];
+    document.querySelectorAll('.toggle[data-val]').forEach(b => {
+      if (turnoutVals.includes(b.dataset.val)) b.classList.remove('active');
+    });
     btn.classList.add('active');
     state.turnoutVar = btn.dataset.val;
   }
@@ -161,12 +164,9 @@ const Config = (() => {
   }
 
   function setElectionType(btn) {
-    document.querySelectorAll('[onclick*="setElectionType"] .toggle, .toggle[onclick*="setElectionType"]').forEach(b => b.classList.remove('active'));
-    // target all election type toggles
+    const electionVals = ['general', 'primary-dem', 'primary-rep', 'primary-custom'];
     document.querySelectorAll('.toggle[data-val]').forEach(b => {
-      if (['general','primary-dem','primary-rep','primary-custom'].includes(b.dataset.val)) {
-        b.classList.remove('active');
-      }
+      if (electionVals.includes(b.dataset.val)) b.classList.remove('active');
     });
     btn.classList.add('active');
     state.electionType = btn.dataset.val;
